@@ -7,4 +7,4 @@ autosave.*
 halshow.*
 metric_mdi_history.txt
 metric_parameters.txt
-
+*.swp

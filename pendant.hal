@@ -1,35 +1,3 @@
-#//////////////////////////////////////////////////////////////////////////
-### Example edit your ini and add :
-#
-#[HAL]
-#HALFILE = <your-machine-hal>.hal
-#HALFILE = xhc-whb04b-6.hal
-#
-## This section is for button mapping, you need to create for your own use.
-#[HALUI]
-#MDI_COMMAND=(debug,macro0)
-#MDI_COMMAND=(debug,macro1)
-#MDI_COMMAND=(debug,macro2)
-#MDI_COMMAND=(debug,macro3)
-#MDI_COMMAND=(debug,macro4)
-#MDI_COMMAND=(debug,macro5)
-#MDI_COMMAND=(debug,macro6)
-#MDI_COMMAND=(debug,macro7)
-#MDI_COMMAND=(debug,macro8)
-#MDI_COMMAND=(debug,macro9)
-#MDI_COMMAND=(debug,macro10)
-#MDI_COMMAND=(debug,macro11)
-#MDI_COMMAND=(debug,macro12)
-#MDI_COMMAND=(debug,macro13)
-#MDI_COMMAND=(debug,macro14)
-#MDI_COMMAND=(debug,macro15)
-#MDI_COMMAND=(debug,macro16)
-#
-#//////////////////////////////////////////////////////////////////////////
-#
-### Hal File xhc_whb04b_6.hal Example for 3 axis but i hope this is easy to add missing axis:
-#
-
 # ######################################################################
 # load pendant components
 # ######################################################################
@@ -41,18 +9,18 @@ loadusr -W xhc-whb04b-6 -HsfB
 # ######################################################################
 
 # On/Off signals
-net machine.is-on                         halui.machine.is-on                   whb.halui.machine.is-on
+net machine-is-on                         whb.halui.machine.is-on
 net pdnt.machine.on                       whb.halui.machine.on                  halui.machine.on
 net pdnt.machine.off                      whb.halui.machine.off                 halui.machine.off
 
 # program related signals
-net pdnt.program.is-idle                  whb.halui.program.is-idle             halui.program.is-idle
-net pdnt.program.is-paused                whb.halui.program.is-paused           halui.program.is-paused
-net pdnt.program-is-running               whb.halui.program.is-running          halui.program.is-running
-net pdnt.program.resume                   whb.halui.program.resume              halui.program.resume
-net pdnt.program.pause                    whb.halui.program.pause               halui.program.pause
-net pdnt.program.run                      whb.halui.program.run                 halui.program.run
-net pdnt.program.stop                     whb.halui.program.stop                halui.program.stop
+net plasmac:program-is-idle               whb.halui.program.is-idle
+net plasmac:program-is-paused             whb.halui.program.is-paused
+net plasmac:program-is-running            whb.halui.program.is-running
+#net plasmac:program-resume                whb.halui.program.resume
+#net plasmac:program-pause                 whb.halui.program.pause
+#net plasmac:program-run                   whb.halui.program.run
+#net plasmac:program-stop                  whb.halui.program.stop
 
 # machine mode related signals
 net pdnt.mode.auto                        whb.halui.mode.auto                   halui.mode.auto
@@ -94,23 +62,23 @@ net pdnt.axis.z.jog-vel-mode              whb.axis.z.jog-vel-mode               
 
 
 # macro buttons to MDI commands
-net pdnt.macro-1                          whb.button.macro-1                    halui.mdi-command-01             # use MDI command from main.ini
-net pdnt.macro-2                          whb.button.macro-2                    halui.mdi-command-02             # use MDI command from main.ini or used for Hardcoded lube on/off
+#net pdnt.macro-1                          whb.button.macro-1                    halui.mdi-command-01             # use MDI command from main.ini
+#net pdnt.macro-2                          whb.button.macro-2                    halui.mdi-command-02             # use MDI command from main.ini or used for Hardcoded lube on/off
 net pdnt.reserved.for.spindle+            whb.button.macro-3                                                     # Hardcoded for spindle+ whb.halui.spindle.increase
 net pdnt.reserved.for.spindle-            whb.button.macro-4                                                     # Hardcoded for spindle- whb.halui.spindle.decrease
-net pdnt.macro-5                          whb.button.macro-5                    halui.mdi-command-05             # use MDI command from main.ini
-net pdnt.macro-6                          whb.button.macro-6                    halui.mdi-command-06             # use MDI command from main.ini
-net pdnt.macro-7                          whb.button.macro-7                    halui.mdi-command-07             # use MDI command from main.ini
-net pdnt.reserved.for.spindle.dir         whb.button.macro-8                                                     # Hardcoded for spindle direction inside pendant
-net pdnt.macro-9                          whb.button.macro-9                    halui.mdi-command-09             # use MDI command from main.ini
+#net pdnt.macro-5                          whb.button.macro-5                    halui.mdi-command-05             # use MDI command from main.ini
+#net pdnt.macro-6                          whb.button.macro-6                    halui.mdi-command-06             # use MDI command from main.ini
+#net pdnt.macro-7                          whb.button.macro-7                    halui.mdi-command-07             # use MDI command from main.ini
+#net pdnt.reserved.for.spindle.dir         whb.button.macro-8                                                     # Hardcoded for spindle direction inside pendant
+#net pdnt.macro-9                          whb.button.macro-9                    halui.mdi-command-09             # use MDI command from main.ini
 net pdnt.reserved.for.ABS-REL             whb.button.macro-10                                                    # Hardcoded for swap Dro  Relative/Absolue
-net pdnt.macro-14                         whb.button.macro-14                   halui.mdi-command-14             # use MDI command from main.ini
+#net pdnt.macro-14                         whb.button.macro-14                   halui.mdi-command-14             # use MDI command from main.ini
 net pdnt.reserved.for.flood               whb.button.macro-15                                                    # Hardcoded for halui.flood on/off
 net pdnt.reserved.for.mist                whb.button.macro-16                                                    # Hardcoded for halui.mist on/off
 
-net pdnt.macro.11                         whb.button.macro-11                   halui.mdi-command-11             # use MDI command from main.ini
-net pdnt.macro.12                         whb.button.macro-12                   halui.mdi-command-12             # use MDI command from main.ini
-net pdnt.macro.13                         whb.button.macro-13                   halui.mdi-command-13             # use MDI command from main.ini
+#net pdnt.macro.11                         whb.button.macro-11                   halui.mdi-command-11             # use MDI command from main.ini
+#net pdnt.macro.12                         whb.button.macro-12                   halui.mdi-command-12             # use MDI command from main.ini
+#net pdnt.macro.13                         whb.button.macro-13                   halui.mdi-command-13             # use MDI command from main.ini
 
 
 # flood and mist toggle signals
@@ -129,9 +97,9 @@ net  pdnt.mist.on                         whb.halui.mist.on                     
 
 # default function button signals
 net pdnt.button.m-home                    whb.button.m-home                     halui.home-all                   # Homing use built-in halui home all
-net pdnt.button.safe-z                    whb.button.safe-z                     halui.mdi-command-03             # Safe-z  use MDI command from main.ini
-net pdnt.button.w-home                    whb.button.w-home                     halui.mdi-command-04             # Unpark  use MDI command from main.ini
-net pdnt.button.probe-z                   whb.button.probe-z                    halui.mdi-command-08             # Probe-Z use MDI command from main.ini
+#net pdnt.button.safe-z                    whb.button.safe-z                     halui.mdi-command-03             # Safe-z  use MDI command from main.ini
+net pdnt.button.w-home                    whb.button.w-home                     halui.mdi-command-00             # Unpark  use MDI command from main.ini
+#net pdnt.button.probe-z                   whb.button.probe-z                    halui.mdi-command-08             # Probe-Z use MDI command from main.ini
 
 
 # unused, just exposes pendant internal status or as basic button
@@ -154,9 +122,9 @@ net pdnt.button.probe-z                   whb.button.probe-z                    
 
 
 # spindle related signals
-net pdnt.spindle.is-on                    whb.halui.spindle.is-on               spindle.0.on
+net plasmac:cutting-start                 whb.halui.spindle.is-on              
 net pdnt.spindle.start                    whb.halui.spindle.start               halui.spindle.0.start
-net pdnt.spindle.stop                     whb.halui.spindle.stop                halui.spindle.0.stop
+#net plasmac:cutting-stop                  whb.halui.spindle.stop                
 net pdnt.spindle.forward                  whb.halui.spindle.forward             halui.spindle.0.forward
 net pdnt.spindle.reverse                  whb.halui.spindle.reverse             halui.spindle.0.reverse
 net pdnt.spindle.increase                 whb.halui.spindle.increase            halui.spindle.0.increase         # reserved whb.button.macro-3
@@ -165,10 +133,10 @@ net pdnt.spindle-speed-abs                whb.halui.spindle-speed-cmd           
 
 
 # spindle speed override signals
-net pdnt.spindle-override.scale           whb.halui.spindle-override.scale      halui.spindle.0.override.scale   # needed for both spindle+/- and spindleoverride+/- button
-net pdnt.spindle.override.value           halui.spindle.0.override.value        whb.halui.spindle-override.value # GUI feed rate related signals
-net pdnt.spindle.override.increase        whb.halui.spindle-override.increase   halui.spindle.0.override.increase
-net pdnt.spindle.override.decrease        whb.halui.spindle-override.decrease   halui.spindle.0.override.decrease
+#net pdnt.spindle-override.scale           whb.halui.spindle-override.scale      halui.spindle.0.override.scale   # needed for both spindle+/- and spindleoverride+/- button
+#net pdnt.spindle.override.value          halui.spindle.0.override.value        whb.halui.spindle-override.value # GUI feed rate related signals
+#net pdnt.spindle.override.increase        whb.halui.spindle-override.increase   halui.spindle.0.override.increase
+#net pdnt.spindle.override.decrease        whb.halui.spindle-override.decrease   halui.spindle.0.override.decrease
 
 
 # GUI feed rate related signals can be used when program is running moving GUI slider
@@ -177,7 +145,7 @@ net pdnt.max-velocity.value               whb.halui.max-velocity.value          
 
 
 # take feed override min/max values from/to the GUI
-net pdnt.feed-override.value              halui.feed-override.value             whb.halui.feed-override.value    # GUI feed rate related signals
+net plasmac:feed-override                 whb.halui.feed-override.value    # GUI feed rate related signals
 net pdnt.feed-override.increase           whb.halui.feed-override.increase      halui.feed-override.increase
 net pdnt.feed-override.decrease           whb.halui.feed-override.decrease      halui.feed-override.decrease
 

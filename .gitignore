@@ -1,1 +1,5 @@
 .idea/
+lazygit
+machine_log*
+*.bak
+

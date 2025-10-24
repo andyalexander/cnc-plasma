@@ -1,0 +1,310 @@
+# core
+loadrt  plasmac
+addf plasmac                  	servo-thread
+
+# ---INPUT DEBOUNCE---
+loadrt dbounce names=db_breakaway,db_float,db_ohmic,db_arc-ok
+addf db_float     				servo-thread
+addf db_ohmic     				servo-thread
+addf db_breakaway 				servo-thread
+addf db_arc-ok    				servo-thread
+
+
+# ---COMMON PLASMAC DEBOUNCE---
+# for the float and ohmic inputs each increment in delay is
+# is a 0.001mm (0.00004") increase in any probed height result
+setp db_float.delay     5
+setp db_float.delay     5
+# set to zero if using internal ohmic sensing
+setp db_ohmic.delay     0
+setp db_breakaway.delay 5
+setp db_arc-ok.delay    5
+
+
+# home and limit switches for x, y and y_slave
+net all-home     <=  hm2_[MESA](BOARD).0.gpio.000.in
+net all-home     =>  joint.0.home-sw-in
+net all-home     =>  joint.0.neg-lim-sw-in
+net all-home     =>  joint.1.home-sw-in
+net all-home     =>  joint.1.neg-lim-sw-in
+net all-home     =>  joint.2.home-sw-in
+net all-home     =>  joint.2.neg-lim-sw-in
+
+# Z axis FLOAT SWITCH - use the single in series switches, but debounce for probe
+net all-home 	=> db_float.in
+
+
+
+
+
+# ---OHMIC SENSE CONTACT DEBOUNCE---
+setp plasmac.ohmic-sense-off-delay  3
+setp plasmac.ohmic-sense-on-delay   3
+
+
+
+
+
+# simulated estop
+loadrt or2 names=estop_or
+loadrt not names=estop_not,estop_not_1
+addf estop_or    servo-thread
+addf estop_not   servo-thread
+addf estop_not_1 servo-thread
+net sim:estop-raw estop_or.out  => estop_not.in
+net sim:estop-out estop_not.out => iocontrol.0.emc-enable-in
+
+
+# kinematics
+loadrt [KINS](KINEMATICS)
+
+
+# motion controller
+loadrt [EMCMOT](EMCMOT) servo_period_nsec=[EMCMOT](SERVO_PERIOD) num_joints=[KINS](JOINTS) num_spindles=[TRAJ](SPINDLES)
+
+
+# THC - uses encoder 0
+loadrt thc
+setp thc.vel-scale					0.00994406
+setp thc.scale-offset				3137.5
+# use single input on phase A - connect ENCA+ / ENCB+ and IDX+ to the encoder
+setp hm2_[MESA](BOARD).0.encoder.00.counter-mode 		1 
+setp hm2_[MESA](BOARD).0.encoder.00.filter	 			0 
+#setp hm2_[MESA](BOARD).0.encoder,00.scale				-1
+net plasmac:arc-voltage-in			<= hm2_[MESA](BOARD).0.encoder.00.velocity
+net plasmac:arc-voltage-in			=> plasmac.arc-voltage-in
+
+
+
+
+
+
+
+
+
+# hostmot2 driver
+loadrt hostmot2
+loadrt [HM2](DRIVER) board_ip=[HM2](ADDRESS) config="num_encoders=6 num_stepgens=6 sserial_port_0=00000000"
+
+setp hm2_[MESA](BOARD).0.watchdog.timeout_ns 5000000
+
+loadrt pid names=pid.x,pid.y0,pid.y1,pid.z
+
+# PID Information for Stepper Boards
+# Mesa hardware step generators at every servo thread invocation, the step
+# generator hardware is given a new velocity. Without feedback from the PID
+# controller the hardware position would slowly drift because of clock speed and
+# timing differences between LinuxCNC and the step generator hardware.
+# The PID controller gets feedback from the actual (fractional) step position and
+# corrects for these small differences.
+
+# THREADS
+addf hm2_[MESA](BOARD).0.read servo-thread
+addf motion-command-handler servo-thread
+addf motion-controller servo-thread
+addf pid.x.do-pid-calcs servo-thread
+addf pid.y0.do-pid-calcs servo-thread
+addf pid.y1.do-pid-calcs servo-thread
+addf pid.z.do-pid-calcs servo-thread
+addf hm2_[MESA](BOARD).0.write servo-thread
+
+# DPLL TIMER
+setp hm2_[MESA](BOARD).0.dpll.01.timer-us -200
+setp hm2_[MESA](BOARD).0.stepgen.timer-number 1
+
+# amp enable
+net motion-enable <= motion.motion-enabled
+
+# Board: 7i95
+
+# Axis: X Joint: 0 Output: 0
+# PID Setup
+setp pid.x.Pgain [JOINT_0](P)
+setp pid.x.Igain [JOINT_0](I)
+setp pid.x.Dgain [JOINT_0](D)
+setp pid.x.bias [JOINT_0](BIAS)
+setp pid.x.FF0 [JOINT_0](FF0)
+setp pid.x.FF1 [JOINT_0](FF1)
+setp pid.x.FF2 [JOINT_0](FF2)
+setp pid.x.deadband [JOINT_0](DEADBAND)
+setp pid.x.maxoutput [JOINT_0](MAX_OUTPUT)
+setp pid.x.error-previous-target True
+# limit stepgen velocity corrections caused by position feedback jitter
+setp pid.x.maxerror [JOINT_0](MAX_ERROR)
+
+# joint-0 enable chain
+net joint-0-index-enable <=> pid.x.index-enable
+net joint-0-index-enable <=> joint.0.index-enable
+
+net joint-0-enable <= joint.0.amp-enable-out
+net joint-0-enable => pid.x.enable
+
+net joint-0-enable => hm2_[MESA](BOARD).0.stepgen.00.enable
+
+# Joint 0 Step Generator Settings
+setp hm2_[MESA](BOARD).0.stepgen.00.dirsetup [JOINT_0](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.00.dirhold [JOINT_0](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.00.steplen [JOINT_0](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.00.stepspace [JOINT_0](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.00.position-scale [JOINT_0](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.00.maxvel [JOINT_0](STEPGEN_MAX_VEL)
+setp hm2_[MESA](BOARD).0.stepgen.00.maxaccel [JOINT_0](STEPGEN_MAX_ACC)
+setp hm2_[MESA](BOARD).0.stepgen.00.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.00.control-type 1
+
+
+# position command and feedback
+net joint-0-pos-cmd <= joint.0.motor-pos-cmd
+net joint-0-pos-cmd => pid.x.command
+
+net joint-0-pos-fb <= hm2_[MESA](BOARD).0.stepgen.00.position-fb
+net joint-0-pos-fb => joint.0.motor-pos-fb
+net joint-0-pos-fb => pid.x.feedback
+
+# PID Output
+net joint.0.output <= pid.x.output
+net joint.0.output => hm2_[MESA](BOARD).0.stepgen.00.velocity-cmd
+
+# Axis: Y Joint: 1 Output: 1
+# PID Setup
+setp pid.y0.Pgain [JOINT_1](P)
+setp pid.y0.Igain [JOINT_1](I)
+setp pid.y0.Dgain [JOINT_1](D)
+setp pid.y0.bias [JOINT_1](BIAS)
+setp pid.y0.FF0 [JOINT_1](FF0)
+setp pid.y0.FF1 [JOINT_1](FF1)
+setp pid.y0.FF2 [JOINT_1](FF2)
+setp pid.y0.deadband [JOINT_1](DEADBAND)
+setp pid.y0.maxoutput [JOINT_1](MAX_OUTPUT)
+setp pid.y0.error-previous-target True
+# limit stepgen velocity corrections caused by position feedback jitter
+setp pid.y0.maxerror [JOINT_1](MAX_ERROR)
+
+# joint-1 enable chain
+net joint-1-index-enable <=> pid.y0.index-enable
+net joint-1-index-enable <=> joint.1.index-enable
+
+net joint-1-enable <= joint.1.amp-enable-out
+net joint-1-enable => pid.y0.enable
+
+net joint-1-enable => hm2_[MESA](BOARD).0.stepgen.01.enable
+
+# Joint 1 Step Generator Settings
+setp hm2_[MESA](BOARD).0.stepgen.01.dirsetup [JOINT_1](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.01.dirhold [JOINT_1](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.01.steplen [JOINT_1](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.01.stepspace [JOINT_1](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.01.position-scale [JOINT_1](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.01.maxvel [JOINT_1](STEPGEN_MAX_VEL)
+setp hm2_[MESA](BOARD).0.stepgen.01.maxaccel [JOINT_1](STEPGEN_MAX_ACC)
+setp hm2_[MESA](BOARD).0.stepgen.01.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.01.control-type 1
+
+
+# position command and feedback
+net joint-1-pos-cmd <= joint.1.motor-pos-cmd
+net joint-1-pos-cmd => pid.y0.command
+
+net joint-1-pos-fb <= hm2_[MESA](BOARD).0.stepgen.01.position-fb
+net joint-1-pos-fb => joint.1.motor-pos-fb
+net joint-1-pos-fb => pid.y0.feedback
+
+# PID Output
+net joint.1.output <= pid.y0.output
+net joint.1.output => hm2_[MESA](BOARD).0.stepgen.01.velocity-cmd
+
+# Axis: Y Joint: 2 Output: 2
+# PID Setup
+setp pid.y1.Pgain [JOINT_2](P)
+setp pid.y1.Igain [JOINT_2](I)
+setp pid.y1.Dgain [JOINT_2](D)
+setp pid.y1.bias [JOINT_2](BIAS)
+setp pid.y1.FF0 [JOINT_2](FF0)
+setp pid.y1.FF1 [JOINT_2](FF1)
+setp pid.y1.FF2 [JOINT_2](FF2)
+setp pid.y1.deadband [JOINT_2](DEADBAND)
+setp pid.y1.maxoutput [JOINT_2](MAX_OUTPUT)
+setp pid.y1.error-previous-target True
+# limit stepgen velocity corrections caused by position feedback jitter
+setp pid.y1.maxerror [JOINT_2](MAX_ERROR)
+
+# joint-2 enable chain
+net joint-2-index-enable <=> pid.y1.index-enable
+net joint-2-index-enable <=> joint.2.index-enable
+
+net joint-2-enable <= joint.2.amp-enable-out
+net joint-2-enable => pid.y1.enable
+
+net joint-2-enable => hm2_[MESA](BOARD).0.stepgen.02.enable
+
+# Joint 2 Step Generator Settings
+setp hm2_[MESA](BOARD).0.stepgen.02.dirsetup [JOINT_2](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.02.dirhold [JOINT_2](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.02.steplen [JOINT_2](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.02.stepspace [JOINT_2](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.02.position-scale [JOINT_2](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.02.maxvel [JOINT_2](STEPGEN_MAX_VEL)
+setp hm2_[MESA](BOARD).0.stepgen.02.maxaccel [JOINT_2](STEPGEN_MAX_ACC)
+setp hm2_[MESA](BOARD).0.stepgen.02.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.02.control-type 1
+
+
+# position command and feedback
+net joint-2-pos-cmd <= joint.2.motor-pos-cmd
+net joint-2-pos-cmd => pid.y1.command
+
+net joint-2-pos-fb <= hm2_[MESA](BOARD).0.stepgen.02.position-fb
+net joint-2-pos-fb => joint.2.motor-pos-fb
+net joint-2-pos-fb => pid.y1.feedback
+
+# PID Output
+net joint.2.output <= pid.y1.output
+net joint.2.output => hm2_[MESA](BOARD).0.stepgen.02.velocity-cmd
+
+# Axis: Z Joint: 3 Output: 3
+# PID Setup
+setp pid.z.Pgain [JOINT_3](P)
+setp pid.z.Igain [JOINT_3](I)
+setp pid.z.Dgain [JOINT_3](D)
+setp pid.z.bias [JOINT_3](BIAS)
+setp pid.z.FF0 [JOINT_3](FF0)
+setp pid.z.FF1 [JOINT_3](FF1)
+setp pid.z.FF2 [JOINT_3](FF2)
+setp pid.z.deadband [JOINT_3](DEADBAND)
+setp pid.z.maxoutput [JOINT_3](MAX_OUTPUT)
+setp pid.z.error-previous-target True
+# limit stepgen velocity corrections caused by position feedback jitter
+setp pid.z.maxerror [JOINT_3](MAX_ERROR)
+
+# joint-3 enable chain
+net joint-3-index-enable <=> pid.z.index-enable
+net joint-3-index-enable <=> joint.3.index-enable
+
+net joint-3-enable <= joint.3.amp-enable-out
+net joint-3-enable => pid.z.enable
+
+net joint-3-enable => hm2_[MESA](BOARD).0.stepgen.03.enable
+
+# Joint 3 Step Generator Settings
+setp hm2_[MESA](BOARD).0.stepgen.03.dirsetup [JOINT_3](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.03.dirhold [JOINT_3](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.03.steplen [JOINT_3](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.03.stepspace [JOINT_3](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.03.position-scale [JOINT_3](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.03.maxvel [JOINT_3](STEPGEN_MAX_VEL)
+setp hm2_[MESA](BOARD).0.stepgen.03.maxaccel [JOINT_3](STEPGEN_MAX_ACC)
+setp hm2_[MESA](BOARD).0.stepgen.03.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.03.control-type 1
+
+
+# position command and feedback
+net joint-3-pos-cmd <= joint.3.motor-pos-cmd
+net joint-3-pos-cmd => pid.z.command
+
+net joint-3-pos-fb <= hm2_[MESA](BOARD).0.stepgen.03.position-fb
+net joint-3-pos-fb => joint.3.motor-pos-fb
+net joint-3-pos-fb => pid.z.feedback
+
+# PID Output
+net joint.3.output <= pid.z.output
+net joint.3.output => hm2_[MESA](BOARD).0.stepgen.03.velocity-cmd

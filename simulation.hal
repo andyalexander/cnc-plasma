@@ -1,0 +1,25 @@
+loadrt sim_home_switch names=sim-home-switch,sim-z-float
+loadrt not names=not-0,not-1
+
+
+addf sim-home-switch					servo-thread
+addf sim-z-float 						servo-thread
+addf not-0								servo-thread
+addf not-1								servo-thread
+
+
+net sim-home-switch-not	sim-home-switch.home-sw	=> not-0.in	
+net all-home  			<= not-0.out
+
+net joint-0-pos			joint.0.pos-fb			=> sim-home-switch.cur-pos
+net joint-1-pos			joint.1.pos-fb			=> sim-home-switch.cur-pos
+
+setp sim-home-switch.home-pos 1
+
+#net home-y-not			home-switch-1.home-sw	=> not-1.in	
+#net home-y  			not-1.out			 	=> joint.1.home-sw-in
+#net home-y										=> joint.2.home-sw-in
+#net joint-1-pos			joint.1.pos-fb			=> home-switch-1.cur-pos
+#setp home-switch-1.home-pos 1
+
+

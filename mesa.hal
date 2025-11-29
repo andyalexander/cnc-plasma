@@ -4,8 +4,8 @@ addf plasmac                  	servo-thread
 
 # ---INPUT DEBOUNCE---
 loadrt dbounce names=db_breakaway,db_float,db_ohmic,db_arc-ok
-addf db_float     				servo-thread
-addf db_ohmic     				servo-thread
+addf db_float    				servo-thread
+#addf db_ohmic     				servo-thread
 addf db_breakaway 				servo-thread
 addf db_arc-ok    				servo-thread
 
@@ -13,46 +13,34 @@ addf db_arc-ok    				servo-thread
 # ---COMMON PLASMAC DEBOUNCE---
 # for the float and ohmic inputs each increment in delay is
 # is a 0.001mm (0.00004") increase in any probed height result
-setp db_float.delay     5
-setp db_float.delay     5
+setp db_float.delay     0
 # set to zero if using internal ohmic sensing
-setp db_ohmic.delay     0
+#setp db_ohmic.delay     0
 setp db_breakaway.delay 5
 setp db_arc-ok.delay    5
 
 
-# home and limit switches for x, y and y_slave
-net all-home     <=  hm2_[MESA](BOARD).0.gpio.000.in
-net all-home     =>  joint.0.home-sw-in
-net all-home     =>  joint.0.neg-lim-sw-in
-net all-home     =>  joint.1.home-sw-in
-net all-home     =>  joint.1.neg-lim-sw-in
-net all-home     =>  joint.2.home-sw-in
-net all-home     =>  joint.2.neg-lim-sw-in
 
 # Z axis FLOAT SWITCH - use the single in series switches, but debounce for probe
-net all-home 	=> db_float.in
+#net all-limit 	=> db_lmit.in
 
 
-
+# torch-on
+net plasmac:torch-on => hm2_7i95.0.ssr.00.out-05
 
 
 # ---OHMIC SENSE CONTACT DEBOUNCE---
-setp plasmac.ohmic-sense-off-delay  3
-setp plasmac.ohmic-sense-on-delay   3
+#setp plasmac.ohmic-sense-off-delay  3
+#setp plasmac.ohmic-sense-on-delay   3
 
 
 
 
 
-# simulated estop
-loadrt or2 names=estop_or
-loadrt not names=estop_not,estop_not_1
-addf estop_or    servo-thread
-addf estop_not   servo-thread
-addf estop_not_1 servo-thread
-net sim:estop-raw estop_or.out  => estop_not.in
-net sim:estop-out estop_not.out => iocontrol.0.emc-enable-in
+# estop
+net estop-ext     <=  hm2_[MESA](BOARD).0.inmux.00.input-22
+#net estop-out	  <=  iocontrol.0.user-enable-out
+net estop-ext     =>  iocontrol.0.emc-enable-in
 
 
 # kinematics
@@ -62,19 +50,74 @@ loadrt [KINS](KINEMATICS)
 # motion controller
 loadrt [EMCMOT](EMCMOT) servo_period_nsec=[EMCMOT](SERVO_PERIOD) num_joints=[KINS](JOINTS) num_spindles=[TRAJ](SPINDLES)
 
-
-# THC - uses encoder 0
+#----------------------------------------------------------------------------
+# THC - encoder 2
+#----------------------------------------------------------------------------
 loadrt thc
-setp thc.vel-scale					0.00994406
-setp thc.scale-offset				3137.5
+#setp thc.vel-scale					0.01988813
+#setp thc.vel-scale					0.00039776
+#setp thc.scale-offset				3137.5
+
 # use single input on phase A - connect ENCA+ / ENCB+ and IDX+ to the encoder
-setp hm2_[MESA](BOARD).0.encoder.00.counter-mode 		1 
-setp hm2_[MESA](BOARD).0.encoder.00.filter	 			0 
-#setp hm2_[MESA](BOARD).0.encoder,00.scale				-1
-net plasmac:arc-voltage-in			<= hm2_[MESA](BOARD).0.encoder.00.velocity
-net plasmac:arc-voltage-in			=> plasmac.arc-voltage-in
+setp hm2_[MESA](BOARD).0.encoder.02.counter-mode 		1 
+setp hm2_[MESA](BOARD).0.encoder.02.filter	 			1 
+setp hm2_[MESA](BOARD).0.encoder.02.scale			   -1
+
+net plasmac:arc-voltage-in			<= hm2_[MESA](BOARD).0.encoder.02.velocity
+net plasmac:arc-voltage-in          => plasmac.arc-voltage-in
+net plasmac:arc-ok-in               => db_arc-ok.in
+net plasmac:move-up                 <= plasmac.move-up
+net plasmac:move-down               <= plasmac.move-down
 
 
+#----------------------------------------------------------------------------
+# OHMIC SENSE - encoder 1
+#----------------------------------------------------------------------------
+loadrt ohmic names=ohmicsense
+addf ohmicsense servo-thread
+setp ohmicsense.thcad-0-volt-freq       101200
+setp ohmicsense.thcad-max-volt-freq     904400
+setp ohmicsense.thcad-divide            32
+setp ohmicsense.thcad-fullscale         5
+setp ohmicsense.volt-divider            4.9
+setp ohmicsense.ohmic-threshold         22
+setp ohmicsense.ohmic-low               21
+net ohmic-vel                           ohmicsense.velocity-in <= hm2_[MESA](BOARD).0.encoder.01.velocity
+net ohmic-enable                        ohmicsense.is-probing  <= plasmac.ohmic-enable
+net ohmic-true                          ohmicsense.ohmic-on    => plasmac.ohmic-probe
+
+
+
+
+
+#----------------------------------------------------------------------------
+# LIMIT SWITCHES
+#----------------------------------------------------------------------------
+loadrt lut5
+addf lut5.0 servo-thread
+# output True requires inputs 0-3 to be False, and 4 to be True
+setp lut5.0.function 0x10000  
+# debounced switch
+net all-limit-raw                    <= hm2_[MESA](BOARD).0.inmux.00.input-23-not
+net all-limit-raw                    => db_float.in
+net all-limit-home                   <= db_float.out
+# the switch is the input to lut5.0.4, so only on if no homing at same time
+net all-limit-home                   => lut5.0.in-4
+net all-limit                        <= lut5.0.out
+# create the inputs to the lut5 - whether the axes are homing
+net xhoming                          <= joint.0.homing => lut5.0.in-0
+net y1homing                         <= joint.1.homing => lut5.0.in-1
+net y2homing                         <= joint.2.homing => lut5.0.in-2
+# home switch is just the output of the debounced input
+net all-limit-home                   =>  joint.0.home-sw-in
+net all-limit-home                   =>  joint.1.home-sw-in
+net all-limit-home                   =>  joint.2.home-sw-in
+# limit switches are the output of the lut5, i.e. only on if nothing homing
+net all-limit                        =>  joint.0.neg-lim-sw-in
+net all-limit                        =>  joint.1.neg-lim-sw-in
+net all-limit                        =>  joint.2.neg-lim-sw-in
+
+#net all-limit                        =>  plasmac.float-switch
 
 
 
@@ -139,31 +182,31 @@ net joint-0-index-enable <=> joint.0.index-enable
 net joint-0-enable <= joint.0.amp-enable-out
 net joint-0-enable => pid.x.enable
 
-net joint-0-enable => hm2_[MESA](BOARD).0.stepgen.00.enable
+net joint-0-enable => hm2_[MESA](BOARD).0.stepgen.03.enable
 
 # Joint 0 Step Generator Settings
-setp hm2_[MESA](BOARD).0.stepgen.00.dirsetup [JOINT_0](DIRSETUP)
-setp hm2_[MESA](BOARD).0.stepgen.00.dirhold [JOINT_0](DIRHOLD)
-setp hm2_[MESA](BOARD).0.stepgen.00.steplen [JOINT_0](STEPLEN)
-setp hm2_[MESA](BOARD).0.stepgen.00.stepspace [JOINT_0](STEPSPACE)
-setp hm2_[MESA](BOARD).0.stepgen.00.position-scale [JOINT_0](SCALE)
-setp hm2_[MESA](BOARD).0.stepgen.00.maxvel [JOINT_0](STEPGEN_MAX_VEL)
-setp hm2_[MESA](BOARD).0.stepgen.00.maxaccel [JOINT_0](STEPGEN_MAX_ACC)
-setp hm2_[MESA](BOARD).0.stepgen.00.step_type 0
-setp hm2_[MESA](BOARD).0.stepgen.00.control-type 1
+setp hm2_[MESA](BOARD).0.stepgen.03.dirsetup [JOINT_0](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.03.dirhold [JOINT_0](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.03.steplen [JOINT_0](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.03.stepspace [JOINT_0](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.03.position-scale [JOINT_0](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.03.maxvel [JOINT_0](STEPGEN_MAX_VEL)
+setp hm2_[MESA](BOARD).0.stepgen.03.maxaccel [JOINT_0](STEPGEN_MAX_ACC)
+setp hm2_[MESA](BOARD).0.stepgen.03.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.03.control-type 1
 
 
 # position command and feedback
 net joint-0-pos-cmd <= joint.0.motor-pos-cmd
 net joint-0-pos-cmd => pid.x.command
 
-net joint-0-pos-fb <= hm2_[MESA](BOARD).0.stepgen.00.position-fb
+net joint-0-pos-fb <= hm2_[MESA](BOARD).0.stepgen.03.position-fb
 net joint-0-pos-fb => joint.0.motor-pos-fb
 net joint-0-pos-fb => pid.x.feedback
 
 # PID Output
 net joint.0.output <= pid.x.output
-net joint.0.output => hm2_[MESA](BOARD).0.stepgen.00.velocity-cmd
+net joint.0.output => hm2_[MESA](BOARD).0.stepgen.03.velocity-cmd
 
 # Axis: Y Joint: 1 Output: 1
 # PID Setup
@@ -187,31 +230,31 @@ net joint-1-index-enable <=> joint.1.index-enable
 net joint-1-enable <= joint.1.amp-enable-out
 net joint-1-enable => pid.y0.enable
 
-net joint-1-enable => hm2_[MESA](BOARD).0.stepgen.01.enable
+net joint-1-enable => hm2_[MESA](BOARD).0.stepgen.02.enable
 
 # Joint 1 Step Generator Settings
-setp hm2_[MESA](BOARD).0.stepgen.01.dirsetup [JOINT_1](DIRSETUP)
-setp hm2_[MESA](BOARD).0.stepgen.01.dirhold [JOINT_1](DIRHOLD)
-setp hm2_[MESA](BOARD).0.stepgen.01.steplen [JOINT_1](STEPLEN)
-setp hm2_[MESA](BOARD).0.stepgen.01.stepspace [JOINT_1](STEPSPACE)
-setp hm2_[MESA](BOARD).0.stepgen.01.position-scale [JOINT_1](SCALE)
-setp hm2_[MESA](BOARD).0.stepgen.01.maxvel [JOINT_1](STEPGEN_MAX_VEL)
-setp hm2_[MESA](BOARD).0.stepgen.01.maxaccel [JOINT_1](STEPGEN_MAX_ACC)
-setp hm2_[MESA](BOARD).0.stepgen.01.step_type 0
-setp hm2_[MESA](BOARD).0.stepgen.01.control-type 1
+setp hm2_[MESA](BOARD).0.stepgen.02.dirsetup [JOINT_1](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.02.dirhold [JOINT_1](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.02.steplen [JOINT_1](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.02.stepspace [JOINT_1](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.02.position-scale [JOINT_1](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.02.maxvel [JOINT_1](STEPGEN_MAX_VEL)
+setp hm2_[MESA](BOARD).0.stepgen.02.maxaccel [JOINT_1](STEPGEN_MAX_ACC)
+setp hm2_[MESA](BOARD).0.stepgen.02.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.02.control-type 1
 
 
 # position command and feedback
 net joint-1-pos-cmd <= joint.1.motor-pos-cmd
 net joint-1-pos-cmd => pid.y0.command
 
-net joint-1-pos-fb <= hm2_[MESA](BOARD).0.stepgen.01.position-fb
+net joint-1-pos-fb <= hm2_[MESA](BOARD).0.stepgen.02.position-fb
 net joint-1-pos-fb => joint.1.motor-pos-fb
 net joint-1-pos-fb => pid.y0.feedback
 
 # PID Output
 net joint.1.output <= pid.y0.output
-net joint.1.output => hm2_[MESA](BOARD).0.stepgen.01.velocity-cmd
+net joint.1.output => hm2_[MESA](BOARD).0.stepgen.02.velocity-cmd
 
 # Axis: Y Joint: 2 Output: 2
 # PID Setup
@@ -235,31 +278,31 @@ net joint-2-index-enable <=> joint.2.index-enable
 net joint-2-enable <= joint.2.amp-enable-out
 net joint-2-enable => pid.y1.enable
 
-net joint-2-enable => hm2_[MESA](BOARD).0.stepgen.02.enable
+net joint-2-enable => hm2_[MESA](BOARD).0.stepgen.01.enable
 
 # Joint 2 Step Generator Settings
-setp hm2_[MESA](BOARD).0.stepgen.02.dirsetup [JOINT_2](DIRSETUP)
-setp hm2_[MESA](BOARD).0.stepgen.02.dirhold [JOINT_2](DIRHOLD)
-setp hm2_[MESA](BOARD).0.stepgen.02.steplen [JOINT_2](STEPLEN)
-setp hm2_[MESA](BOARD).0.stepgen.02.stepspace [JOINT_2](STEPSPACE)
-setp hm2_[MESA](BOARD).0.stepgen.02.position-scale [JOINT_2](SCALE)
-setp hm2_[MESA](BOARD).0.stepgen.02.maxvel [JOINT_2](STEPGEN_MAX_VEL)
-setp hm2_[MESA](BOARD).0.stepgen.02.maxaccel [JOINT_2](STEPGEN_MAX_ACC)
-setp hm2_[MESA](BOARD).0.stepgen.02.step_type 0
-setp hm2_[MESA](BOARD).0.stepgen.02.control-type 1
+setp hm2_[MESA](BOARD).0.stepgen.01.dirsetup [JOINT_2](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.01.dirhold [JOINT_2](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.01.steplen [JOINT_2](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.01.stepspace [JOINT_2](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.01.position-scale [JOINT_2](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.01.maxvel [JOINT_2](STEPGEN_MAX_VEL)
+setp hm2_[MESA](BOARD).0.stepgen.01.maxaccel [JOINT_2](STEPGEN_MAX_ACC)
+setp hm2_[MESA](BOARD).0.stepgen.01.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.01.control-type 1
 
 
 # position command and feedback
 net joint-2-pos-cmd <= joint.2.motor-pos-cmd
 net joint-2-pos-cmd => pid.y1.command
 
-net joint-2-pos-fb <= hm2_[MESA](BOARD).0.stepgen.02.position-fb
+net joint-2-pos-fb <= hm2_[MESA](BOARD).0.stepgen.01.position-fb
 net joint-2-pos-fb => joint.2.motor-pos-fb
 net joint-2-pos-fb => pid.y1.feedback
 
 # PID Output
 net joint.2.output <= pid.y1.output
-net joint.2.output => hm2_[MESA](BOARD).0.stepgen.02.velocity-cmd
+net joint.2.output => hm2_[MESA](BOARD).0.stepgen.01.velocity-cmd
 
 # Axis: Z Joint: 3 Output: 3
 # PID Setup
@@ -283,28 +326,30 @@ net joint-3-index-enable <=> joint.3.index-enable
 net joint-3-enable <= joint.3.amp-enable-out
 net joint-3-enable => pid.z.enable
 
-net joint-3-enable => hm2_[MESA](BOARD).0.stepgen.03.enable
+net joint-3-enable => hm2_[MESA](BOARD).0.stepgen.00.enable
 
 # Joint 3 Step Generator Settings
-setp hm2_[MESA](BOARD).0.stepgen.03.dirsetup [JOINT_3](DIRSETUP)
-setp hm2_[MESA](BOARD).0.stepgen.03.dirhold [JOINT_3](DIRHOLD)
-setp hm2_[MESA](BOARD).0.stepgen.03.steplen [JOINT_3](STEPLEN)
-setp hm2_[MESA](BOARD).0.stepgen.03.stepspace [JOINT_3](STEPSPACE)
-setp hm2_[MESA](BOARD).0.stepgen.03.position-scale [JOINT_3](SCALE)
-setp hm2_[MESA](BOARD).0.stepgen.03.maxvel [JOINT_3](STEPGEN_MAX_VEL)
-setp hm2_[MESA](BOARD).0.stepgen.03.maxaccel [JOINT_3](STEPGEN_MAX_ACC)
-setp hm2_[MESA](BOARD).0.stepgen.03.step_type 0
-setp hm2_[MESA](BOARD).0.stepgen.03.control-type 1
+setp hm2_[MESA](BOARD).0.stepgen.00.dirsetup [JOINT_3](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.00.dirhold [JOINT_3](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.00.steplen [JOINT_3](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.00.stepspace [JOINT_3](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.00.position-scale [JOINT_3](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.00.maxvel [JOINT_3](STEPGEN_MAX_VEL)
+setp hm2_[MESA](BOARD).0.stepgen.00.maxaccel [JOINT_3](STEPGEN_MAX_ACC)
+setp hm2_[MESA](BOARD).0.stepgen.00.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.00.control-type 1
 
 
 # position command and feedback
 net joint-3-pos-cmd <= joint.3.motor-pos-cmd
 net joint-3-pos-cmd => pid.z.command
 
-net joint-3-pos-fb <= hm2_[MESA](BOARD).0.stepgen.03.position-fb
+net joint-3-pos-fb <= hm2_[MESA](BOARD).0.stepgen.00.position-fb
 net joint-3-pos-fb => joint.3.motor-pos-fb
 net joint-3-pos-fb => pid.z.feedback
 
 # PID Output
 net joint.3.output <= pid.z.output
-net joint.3.output => hm2_[MESA](BOARD).0.stepgen.03.velocity-cmd
+net joint.3.output => hm2_[MESA](BOARD).0.stepgen.00.velocity-cmd
+
+

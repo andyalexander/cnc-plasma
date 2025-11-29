@@ -27,7 +27,7 @@ desktop_notify = True
 notify_max_msgs = 10
 shutdown_check = False
 sound_player_on = False
-MainWindow-geometry = 468 376 1348 702
+MainWindow-geometry = 392 269 1784 1242
 
 [MCH_MSG_OPTIONS]
 mchnMsg_play_sound = False

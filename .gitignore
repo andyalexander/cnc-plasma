@@ -8,3 +8,6 @@ halshow.*
 metric_mdi_history.txt
 metric_parameters.txt
 *.swp
+machine_log_*.txt
+upodate_log.txt
+ 

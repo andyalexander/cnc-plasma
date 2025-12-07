@@ -150,3 +150,7 @@ Hole diameter = 32
 Hole speed = 60
 Grid Size = 0
 
+[SINGLE CUT]
+X length = 0.0
+Y length = 0.0
+

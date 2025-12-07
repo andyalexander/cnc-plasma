@@ -6,10 +6,9 @@ addf plasmac                  	servo-thread
 # ---INPUT DEBOUNCE---
 loadrt dbounce names=db_breakaway,db_float,db_ohmic,db_arc-ok
 addf db_float    				servo-thread
-#addf db_ohmic     				servo-thread
+addf db_ohmic     				servo-thread
 addf db_breakaway 				servo-thread
 addf db_arc-ok    				servo-thread
-addf db_ohmic    				servo-thread
 
 
 # ---COMMON PLASMAC DEBOUNCE---
@@ -17,26 +16,13 @@ addf db_ohmic    				servo-thread
 # is a 0.001mm (0.00004") increase in any probed height result
 setp db_float.delay     0
 # set to zero if using internal ohmic sensing
-#setp db_ohmic.delay     0
+setp db_ohmic.delay     5
 setp db_breakaway.delay 5
 setp db_arc-ok.delay    5
 
 
-
-# Z axis FLOAT SWITCH - use the single in series switches, but debounce for probe
-#net all-limit 	=> db_lmit.in
-
-
 # torch-on
 net plasmac:torch-on => hm2_7i95.0.ssr.00.out-05
-
-
-# ---OHMIC SENSE CONTACT DEBOUNCE---
-#setp plasmac.ohmic-sense-off-delay  3
-#setp plasmac.ohmic-sense-on-delay   3
-
-
-
 
 
 # estop
@@ -77,17 +63,28 @@ net plasmac:move-down               <= plasmac.move-down
 #----------------------------------------------------------------------------
 loadrt ohmic names=ohmicsense
 addf ohmicsense servo-thread
-setp ohmicsense.thcad-0-volt-freq       101200
-setp ohmicsense.thcad-max-volt-freq     904400
-setp ohmicsense.thcad-divide            32
-setp ohmicsense.thcad-fullscale         5
-setp ohmicsense.volt-divider            4.9
-setp ohmicsense.ohmic-threshold         22
-setp ohmicsense.ohmic-low               21
+setp hm2_[MESA](BOARD).0.encoder.01.counter-mode 		1 
+#setp hm2_[MESA](BOARD).0.encoder.01.filter	 			1 
+setp hm2_[MESA](BOARD).0.encoder.01.scale			   -1
+setp ohmicsense.thcad-0-volt-freq                       101200
+setp ohmicsense.thcad-max-volt-freq                     904400
+setp ohmicsense.thcad-divide                            32
+setp ohmicsense.thcad-fullscale                         5
+setp ohmicsense.volt-divider                            4.9
+setp ohmicsense.ohmic-threshold                         22
+setp ohmicsense.ohmic-low                               21
 net ohmic-vel                           ohmicsense.velocity-in <= hm2_[MESA](BOARD).0.encoder.01.velocity
 net ohmic-enable                        ohmicsense.is-probing  <= plasmac.ohmic-enable
-net ohmic-true                          ohmicsense.ohmic-on    => plasmac.ohmic-probe
+#net ohmic-true                          ohmicsense.ohmic-on    => plasmac.ohmic-probe
+unlinkp db_ohmic.in
+net ohmic-true                          ohmicsense.ohmic-on    => db_ohmic.in
 
+
+
+
+# ---OHMIC SENSE CONTACT DEBOUNCE---
+setp plasmac.ohmic-sense-off-delay  3
+setp plasmac.ohmic-sense-on-delay   3
 
 
 
@@ -110,42 +107,20 @@ net all-limit                        <= lut5.0.out
 net xhoming                          <= joint.0.homing => lut5.0.in-0
 net y1homing                         <= joint.1.homing => lut5.0.in-1
 net y2homing                         <= joint.2.homing => lut5.0.in-2
+net ohmic-enable                     => lut5.0.in-3
 # home switch is just the output of the debounced input
 net all-limit-home                   =>  joint.0.home-sw-in
 net all-limit-home                   =>  joint.1.home-sw-in
 net all-limit-home                   =>  joint.2.home-sw-in
+net all-limit-home                   =>  plasmac.float-switch
 # limit switches are the output of the lut5, i.e. only on if nothing homing
 net all-limit                        =>  joint.0.neg-lim-sw-in
 net all-limit                        =>  joint.1.neg-lim-sw-in
 net all-limit                        =>  joint.2.neg-lim-sw-in
 
-#net all-limit                        =>  plasmac.float-switch
 
 
-# OHMIC SENSING - uses encoder 1
-# Example Calibration Data: 0v = 122.9 kHz, 10v = 925.7 Khz should be entered as 122900 and 925700
-setp hm2_[MESA](BOARD).0.encoder.01.counter-mode  1
-setp hm2_[MESA](BOARD).0.encoder.01.filter        1
-setp hm2_[MESA](BOARD).0.encoder.01.scale        -1
- 
-setp ohmicsense.thcad-0-volt-freq    101200
-setp ohmicsense.thcad-max-volt-freq  904400
-setp ohmicsense.thcad-divide         32
-setp ohmicsense.thcad-fullscale      5
-setp ohmicsense.volt-divider         4.9
-setp ohmicsense.ohmic-threshold      22
-setp ohmicsense.ohmic-low            21.5
-setp ohmicsense.mode                 1 
-setp ohmicsense.num-readings         10
-net ohmic-vel ohmicsense.velocity-in <= hm2_[MESA](BOARD).0.encoder.01.velocity
 
-unlinkp db_ohmic.in
-net ohmic-true ohmicsense.ohmic-on => db_ohmic.in
-net plasmac:ohmic-enable => ohmicsense.is-probing
-
-# ---OHMIC SENSE CONTACT DEBOUNCE---
-setp plasmac.ohmic-sense-off-delay  3
-setp plasmac.ohmic-sense-on-delay   3
 
 
 

@@ -84,10 +84,10 @@ Disabled = #b0b0b0
 Preview = #000000
 
 [ENABLE_OPTIONS]
-THC enable = False
+THC enable = True
 Corner lock enable = False
 Void lock enable = False
-Use auto volts = False
+Use auto volts = True
 Ohmic probe enable = True
 THC auto = True
 

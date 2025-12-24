@@ -1,4 +1,4 @@
-boards = [{'freq_zero': 100.4, 'freq_full': 904.9, 'volt_full':5 ,'freq_div':32, 'plasma_divider_ratio':50},
+boards = [{'freq_zero': 100.4, 'freq_full': 904.9, 'volt_full':5 ,'freq_div':32, 'plasma_divider_ratio':40},
           {'freq_zero': 101.2, 'freq_full': 904.4, 'volt_full':5,'freq_div':32,'plasma_divider_ratio':1},
           ]
 
@@ -24,5 +24,3 @@ for i, board in enumerate(boards):
     print(f"Input voltage will be {board['volt_full']}v to give max torch voltage of {board['volt_full']*board['plasma_divider_ratio']:.0f}v")
 
     print('-' * 40 + '\n')
-
-# V= VFS * (FOUT - FZERO) / (FFS - FZERO)

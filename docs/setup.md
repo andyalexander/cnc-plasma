@@ -1,3 +1,15 @@
+## LinuxCNC
+
+### Installation
+* Post install, do an `sudo apt-get update` then `sudo apt-get upgrade`
+* If you see an error about raspi firmware then run:
+  * `sudo rm /etc/{initramfs/post-update.d/,kernel/{postinst.d/,postrm.d/}}z50-raspi-firmware`
+  * `sudo apt purge raspi-firmware`
+* To check the version you are running execuate `uname -r`
+* 
+
+
+
 ## General hardware
 * Make sure you disable secure boot in the bios
 * MESA manual https://www.mesanet.com/pdf/parallel/7i95tman.pdf
@@ -48,3 +60,7 @@ https://linuxcnc.org/docs/2.9/html/plasma/plasma-cnc-primer.html#_initial_height
 ## QTPlasmac hints
 * On the 'settings' page make sure that 'KB shortcuts' is enabled if you want to be able to use keyboard jogging
 * 
+
+
+## Useful links
+* https://linuxcnc.org/docs/html/plasma/plasma-cnc-primer.html

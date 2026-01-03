@@ -1,0 +1,15 @@
+stepper driver					CW5045
+
+step time				2000 ns
+step space				8000 ns
+direction steup			5000 ns
+direction hold			5000 ns
+steps on 				rising edge
+
+
+
+
+
+rack / pinion			MOD 1
+
+spur gear: outside_diameter / (no_teeth+2)  = MOD

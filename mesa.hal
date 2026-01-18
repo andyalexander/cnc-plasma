@@ -24,10 +24,16 @@ setp db_arc-ok.delay    5
 # torch-on
 net plasmac:torch-on => hm2_7i95.0.ssr.00.out-05
 
+# estop
+#loadrt estop_latch
+#addf estop-latch.0 servo-thread
+#net estop-loopout iocontrol.0.emc-enable-in <= estop-latch.0.ok-out
+#net estop-loopin iocontrol.0.user-enable-out => estop-latch.0.ok-in
+#net estop-reset iocontrol.0.user-request-enable => estop-latch.0.reset
+#net remote-estop estop-latch.0.fault-in <=  hm2_[MESA](BOARD).0.inmux.00.input-22-not
 
 # estop
 net estop-ext     <=  hm2_[MESA](BOARD).0.inmux.00.input-22
-#net estop-out	  <=  iocontrol.0.user-enable-out
 net estop-ext     =>  iocontrol.0.emc-enable-in
 
 
@@ -107,22 +113,16 @@ net all-limit                        <= lut5.0.out
 net xhoming                          <= joint.0.homing => lut5.0.in-0
 net y1homing                         <= joint.1.homing => lut5.0.in-1
 net y2homing                         <= joint.2.homing => lut5.0.in-2
-net ohmic-enable                     => lut5.0.in-3
+net ohmic-enable                                       => lut5.0.in-3
 # home switch is just the output of the debounced input
 net all-limit-home                   =>  joint.0.home-sw-in
 net all-limit-home                   =>  joint.1.home-sw-in
 net all-limit-home                   =>  joint.2.home-sw-in
 net all-limit-home                   =>  plasmac.float-switch
-# limit switches are the output of the lut5, i.e. only on if nothing homing
+# limit switches are the output of the lut5, i.e. only on if nothing  
 net all-limit                        =>  joint.0.neg-lim-sw-in
 net all-limit                        =>  joint.1.neg-lim-sw-in
 net all-limit                        =>  joint.2.neg-lim-sw-in
-
-
-
-
-
-
 
 
 

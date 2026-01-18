@@ -1,5 +1,6 @@
 # cnc-plasma
 
+Suggest cloning into `~/linuxcnc/configs`
 
 
 ## USB devices

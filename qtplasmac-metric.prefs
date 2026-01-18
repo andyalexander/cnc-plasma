@@ -1,6 +1,6 @@
 [GUI_OPTIONS]
 Mode = 0
-Estop type = 0
+Estop type = 2
 Autorepeat all = False
 Flash error = False
 Use keyboard shortcuts = True
@@ -131,6 +131,10 @@ THC Delay = 0.5
 THC Sample Counts = 50
 THC Sample Threshold = 1.0
 THC Threshold = 1.0
+Offset Feed Rate = 7200.0
+Slat Height = 0.0
+X Pierce Offset = 1.6
+Y Pierce Offset = 0.0
 
 [OFFSET_PROBING]
 X axis = 0
@@ -141,8 +145,26 @@ Delay = 0
 Port = 
 
 [CONVERSATIONAL]
-Preamble = G21 G64P0.25 G40 G49 G80 G90 G92.1 G94 G97
-Postamble = G21 G64P0.25 G40 G49 G80 G90 G92.1 G94 G97
+Preamble = G21
+	G64P0.25
+	G40
+	G49
+	G80
+	G90
+	G92.1
+	G94
+	G97
+	M52P1
+Postamble = G21
+	G64P0.25
+	G40
+	G49
+	G80
+	G90
+	G92.1
+	G94
+	G97
+	M52P1
 Origin = 0
 Leadin = 0
 Leadout = 0

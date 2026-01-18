@@ -1,5 +1,8 @@
 stepper driver					CW5045
 
+http://wiki.linuxcnc.org/cgi-bin/wiki.pl?CW5045
+
+
 step time				2000 ns
 step space				8000 ns
 direction steup			5000 ns

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Name=Plasma
+Exec=linuxcnc /home/cnc/linuxcnc/configs/cnc-plasma/qtplasmac.ini
+Type=Application
+Comment=Desktop Launcher for LinuxCNC config made by Stepconf
+Icon=/usr/share/linuxcnc/linuxcncicon.png
+Path=/home/cnc/linuxcnc/configs/cnc-plasma
+StartupNotify=false

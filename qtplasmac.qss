@@ -22,7 +22,7 @@
 #gui_frame, #materials_frame, #camview_frame,
 #conv_frame, #stats_frame, #pmx_stats_frame,
 #machinelog_frame, #ub_frame, #sd_frame,
-#webview_frame, #pierce_config{
+#webview_frame {
     border: 1px solid #ffee06;
     background: #16160e;
     border-radius: 4px }
@@ -31,15 +31,14 @@
 #dro_label, #file_button_label,
 #machine_label, #button_label, #edit_label,
 #file_label, #jog_label, #cut_rec_label,
-#thc_label, #sensor_label, #arc_label,
+#thc_label, #sensor_label, #arc_label, 
 #control_label, #open_label, #mdi_label,
 #config_conf_lbl, #arc_conf_lbl, #thc_conf_lbl,
-#motion_conf_lbl, #probe_conf_lbl,
+#motion_conf_lbl, #probe_conf_lbl, 
 #safety_conf_lbl, #scribe_conf_lbl,
 #spotting_conf_lbl, #utility_label, #gui_label,
 #camview_label, #conv_label, #stats_label,
-#pmx_stats_label, #machinelog_label,
-#pierce_conf_lbl {
+#pmx_stats_label, #machinelog_label {
     color: #16160e;
     background: #ffee06;
     border-top-left-radius: 2px;
@@ -207,7 +206,7 @@ QPushButton:checked:pressed, QToolButton:checked:pressed {
 }
 
 /****** TOUCHOFF BUTTON<<<<<<<<<<<<*/
-#touch_x, #touch_y, #touch_z, #touch_a, #touch_b, #touch_c {
+#touch_x, #touch_y, #touch_z, #touch_a, #touch_b {
     font: 20pt 'DejaVuSans' }
 
 /******    JOG BUTTON ************/
@@ -215,8 +214,7 @@ QPushButton:checked:pressed, QToolButton:checked:pressed {
 #jog_y_minus, #jog_y_plus,
 #jog_z_minus, #jog_z_plus,
 #jog_a_minus, #jog_a_plus,
-#jog_b_minus, #jog_b_plus,
-#jog_c_minus, #jog_c_plus {
+#jog_b_minus, #jog_b_plus {
     background: #16160e;
     border: none }
 
@@ -224,8 +222,7 @@ QPushButton:checked:pressed, QToolButton:checked:pressed {
 #jog_y_minus:pressed, #jog_y_plus:pressed,
 #jog_z_minus:pressed, #jog_z_plus:pressed,
 #jog_a_minus:pressed, #jog_a_plus:pressed,
-#jog_b_minus:pressed, #jog_b_plus:pressed,
-#jog_c_minus:pressed, #jog_c_plus:pressed {
+#jog_b_minus:pressed, #jog_b_plus:pressed {
     background: #36362e }
 
 /******    CUT_RECOVERY BUTTON ************/
@@ -322,13 +319,12 @@ DROLabel[homed=false] {
     color: #b0b0b0;
     border-color: #b0b0b0 }
 
-/****** DRO AXIS LABEL ************/
+/****** DRO LABEL ************/
 #dro_label_x,
 #dro_label_y,
 #dro_label_z,
 #dro_label_a,
-#dro_label_b,
-#dro_label_c {
+#dro_label_b {
     color: #16160e;
     background: #ffee06;
     border: 1px solid #ffee06;
@@ -339,8 +335,7 @@ DROLabel[homed=false] {
 #dro_label_y[homed=false],
 #dro_label_z[homed=false],
 #dro_label_a[homed=false],
-#dro_label_b[homed=false],
-#dro_label_c[homed=false] {
+#dro_label_b[homed=false] {
     background: #b0b0b0;
     border-color: #b0b0b0 }
 
@@ -353,15 +348,18 @@ DROLabel[homed=false] {
 
 /****** RADIO BUTTON ************/
 QRadioButton {
-    font: 12pt }
+    border: 1px solid #ffee06;
+    border-radius: 4 }
 
 QRadioButton::indicator {
-    border: 1px solid #ffee06;
-    border-radius: 4;
-    width: 26;
-    height: 26 }
+    width: 0;
+    background: #16160e }
 
-QRadioButton::indicator:checked {
+QRadioButton:checked {
+    color: #16160e;
+    background: #ffee06 }
+
+QRadioButton:pressed {
     color: #16160e;
     background: #ffee06 }
 

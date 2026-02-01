@@ -3,6 +3,7 @@
 LinuxCNC MESA Hardware Stepgen Configuration Calculator
 Simple script to calculate all parameters and print INI/HAL configuration strings
 """
+import math
 
 # ============================================================================
 # USER INPUTS - EDIT THESE VALUES FOR YOUR MACHINE
@@ -11,8 +12,8 @@ Simple script to calculate all parameters and print INI/HAL configuration string
 # Spur gear
 SPUR_GEAR_TEETH = 20          # Number of teeth on the spur gear
 SPUR_GEAR_MOD = 1.0             # Module of the spur gear (mm) or Diametral Pitch (inches)
+
 # Calculate Spur Gear Circumference
-import math
 SPUR_GEAR_CIRCUMFERENCE = SPUR_GEAR_TEETH * (math.pi * SPUR_GEAR_MOD)  # mm or inches
 
 
@@ -28,8 +29,8 @@ GEAR_RATIO = 1.0                # Motor:Screw ratio (e.g., 2:1 = 2.0, 1:1 = 1.0)
 # Check your driver datasheet - these are conservative defaults
 STEPLEN = 2000                  # Step pulse width (ns) - typical 1000-5000
 STEPSPACE = 8000                # Step pulse space (ns) - typical 1000-5000
-DIRSETUP = 5000                # Direction setup time (ns) - typical 5000-20000
-DIRHOLD = 5000                 # Direction hold time (ns) - typical 5000-20000
+DIRSETUP = 5000                 # Direction setup time (ns) - typical 5000-20000
+DIRHOLD = 5000                  # Direction hold time (ns) - typical 5000-20000
 
 # Desired Machine Performance
 DESIRED_MAX_VELOCITY = 150.0    # mm/s (or inches/s) - what speed you want

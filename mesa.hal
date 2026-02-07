@@ -20,7 +20,6 @@ addf probe-active 				servo-thread
 # for the float and ohmic inputs each increment in delay is
 # is a 0.001mm (0.00004") increase in any probed height result
 setp db_float.delay     0
-# set to zero if using internal ohmic sensing
 setp db_ohmic.delay     5
 setp db_breakaway.delay 5
 setp db_arc-ok.delay    5

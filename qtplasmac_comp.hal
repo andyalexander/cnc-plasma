@@ -39,10 +39,12 @@ net plasmac:adaptive-feed        plasmac.adaptive-feed       =>  motion.adaptive
 net plasmac:feed-hold            plasmac.feed-hold           =>  motion.feed-hold
 net plasmac:jog-inhibit          plasmac.jog-inhibit         =>  motion.jog-inhibit motion.jog-stop
 net plasmac:offset-scale         plasmac.offset-scale        =>  axis.x.eoffset-scale axis.y.eoffset-scale axis.z.eoffset-scale
-net plasmac:program-pause        plasmac.program-pause       =>  halui.program.pause
-net plasmac:program-resume       plasmac.program-resume      =>  halui.program.resume
-net plasmac:program-run          plasmac.program-run         =>  halui.program.run
-net plasmac:program-stop         plasmac.program-stop        =>  halui.program.stop
+
+#net plasmac:program-pause        plasmac.program-pause       =>  halui.program.pause
+#net plasmac:program-resume       plasmac.program-resume      =>  halui.program.resume
+#net plasmac:program-run          plasmac.program-run         =>  halui.program.run
+#net plasmac:program-stop         plasmac.program-stop        =>  halui.program.stop
+
 net plasmac:torch-on             plasmac.torch-on
 net plasmac:x-offset-counts      plasmac.x-offset-counts     =>  axis.x.eoffset-counts
 net plasmac:y-offset-counts      plasmac.y-offset-counts     =>  axis.y.eoffset-counts

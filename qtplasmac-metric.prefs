@@ -88,7 +88,7 @@ THC enable = True
 Corner lock enable = False
 Void lock enable = False
 Use auto volts = True
-Ohmic probe enable = True
+Ohmic probe enable = False
 THC auto = True
 
 [STATISTICS]
@@ -113,7 +113,7 @@ Velocity Anti Dive Threshold = 90.0
 Float Switch Travel = 1.5
 Height Per Volt = 0.1
 Void Sense Slope = 500
-Ohmic Maximum Attempts = 0
+Ohmic Maximum Attempts = 1
 Ohmic Probe Offset = 0.0
 Pid P Gain = 10.0
 Pid D Gain = 0.0

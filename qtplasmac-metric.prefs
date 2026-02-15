@@ -34,7 +34,7 @@ Camera port = 0
 1 Name = OHMIC\TEST
 1 Code = ohmic-test
 2 Name = PROBE\TEST
-2 Code = probe-test 20
+2 Code = probe-test 30
 3 Name = SINGLE\CUT
 3 Code = single-cut
 4 Name = NORMAL\CUT
@@ -84,11 +84,11 @@ Disabled = #b0b0b0
 Preview = #000000
 
 [ENABLE_OPTIONS]
-THC enable = True
+THC enable = False
 Corner lock enable = False
 Void lock enable = False
-Use auto volts = True
-Ohmic probe enable = True
+Use auto volts = False
+Ohmic probe enable = False
 THC auto = True
 
 [STATISTICS]
@@ -119,7 +119,7 @@ Pid P Gain = 10.0
 Pid D Gain = 0.0
 Pid I Gain = 0.0
 Probe Feed Rate = 100.0
-Probe Start Height = 10.0
+Probe Start Height = 5.0
 Arc Restart Delay = 1.0
 Safe Height = 25.0
 Scribe Arming Delay = 0.0

@@ -2,6 +2,7 @@
 AboutDialog-geometry = half
 LncMessage-geometry = default
 axisToolButtonDialog_ENTRY = 910 539 300 150
+FileDialog-geometry = 641 346 696 266
 
 [DIALOG_OPTIONS]
 EntryDialog_play_sound = False
@@ -16,9 +17,11 @@ MachineLogDialog_play_sound = False
 MachineLogDialog_sound_type = READY
 
 [BOOK_KEEPING]
-last_loaded_directory = None
-RecentPath_0 = None
+last_loaded_directory = /home/cnc/linuxcnc/nc_files
+RecentPath_0 = /home/cnc/linuxcnc/nc_files/test1.ngc
 style_QSS_Path = DEFAULT
+last_saved_directory = /home/cnc/linuxcnc/nc_files
+RecentSavedPath_0 = /home/cnc/linuxcnc/nc_files/test1.ngc
 
 [SCREEN_OPTIONS]
 overlay_play_sound = False

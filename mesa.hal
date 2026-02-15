@@ -126,10 +126,11 @@ net all-limit-home                   =>  joint.0.home-sw-in
 net all-limit-home                   =>  joint.1.home-sw-in
 net all-limit-home                   =>  joint.2.home-sw-in
 net all-limit-home                   =>  plasmac.float-switch
-# limit switches are the output of the lut5, i.e. only on if nothing  
+# limit switches are the output of the lut5, i.e. only on if nothing
 net all-limit                        =>  joint.0.neg-lim-sw-in
 net all-limit                        =>  joint.1.neg-lim-sw-in
 net all-limit                        =>  joint.2.neg-lim-sw-in
+net all-limit                        =>  joint.3.neg-lim-sw-in
 
 
 

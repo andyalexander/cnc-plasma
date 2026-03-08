@@ -23,7 +23,8 @@ sudo udevadm control --reload-rules
 echo 'deb [arch=amd64] https://gnipsel.com/mesact/apt-repo stable main' | sudo tee /etc/apt/sources.list.d/mesact.list
 sudo curl --silent --show-error https://gnipsel.com/mesact/apt-repo/pgp-key.public -o /etc/apt/trusted.gpg.d/mesact.asc
 sudo apt update
-sudo apt install mesact
+sudo apt install mesact \
+	ethtool
 
 (type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
 	&& sudo mkdir -p -m 755 /etc/apt/keyrings \
@@ -34,3 +35,19 @@ sudo apt install mesact
 	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
 	&& sudo apt update \
 	&& sudo apt install gh -y
+
+
+# https://wiki.debian.org/Wine#Installation_on_Debian_Jessie_and_newer
+sudo dpkg --add-architecture i386 && sudo apt update
+sudo apt install \
+      wine \
+      wine32 \
+      wine64 \
+      libwine \
+      libwine:i386 \
+      fonts-wine \
+	  winbind
+
+# This is an intel network, disable IRQ coalescing - edit this file to reflect the correct NIC	  
+# after, running sudo ethtool -c enp0s31f6 | grep rx-usecs -> should show `rx-usecs:0`
+sudo cp setup/disable-coalescing  /etc/network/if-up.d/disable-coalescing

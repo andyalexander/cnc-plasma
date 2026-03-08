@@ -17,8 +17,8 @@ MachineLogDialog_play_sound = False
 MachineLogDialog_sound_type = READY
 
 [BOOK_KEEPING]
-last_loaded_directory = /home/cnc/linuxcnc/nc_files
-RecentPath_0 = /home/cnc/linuxcnc/nc_files/test1.ngc
+last_loaded_directory = /home/cnc/linuxcnc/output_files
+RecentPath_0 = /home/cnc/linuxcnc/output_files/test_square(1).ngc
 style_QSS_Path = DEFAULT
 last_saved_directory = /home/cnc/linuxcnc/nc_files
 RecentSavedPath_0 = /home/cnc/linuxcnc/nc_files/test1.ngc

@@ -1,0 +1,3 @@
+# auto-acknowledge tool changes (no physical tool changer)
+net tool-prep-loopback   iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
+net tool-change-loopback iocontrol.0.tool-change  => iocontrol.0.tool-changed

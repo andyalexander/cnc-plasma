@@ -361,4 +361,6 @@ net joint-3-pos-fb => pid.z.feedback
 net joint.3.output <= pid.z.output
 net joint.3.output => hm2_[MESA](BOARD).0.stepgen.00.velocity-cmd
 
+net plasmac:axis-z-position joint.3.pos-fb => plasmac.axis-z-position
+
 

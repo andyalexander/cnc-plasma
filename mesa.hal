@@ -10,12 +10,16 @@ addf db_ohmic     				servo-thread
 addf db_breakaway 				servo-thread
 addf db_arc-ok    				servo-thread
 
+# ---PROBE ACTIVE LOGIC---
+# Disable limits during ohmic probing or Z-offset operations
+loadrt or2 names=probe-active
+addf probe-active 				servo-thread
+
 
 # ---COMMON PLASMAC DEBOUNCE---
 # for the float and ohmic inputs each increment in delay is
 # is a 0.001mm (0.00004") increase in any probed height result
 setp db_float.delay     0
-# set to zero if using internal ohmic sensing
 setp db_ohmic.delay     5
 setp db_breakaway.delay 5
 setp db_arc-ok.delay    5
@@ -113,16 +117,20 @@ net all-limit                        <= lut5.0.out
 net xhoming                          <= joint.0.homing => lut5.0.in-0
 net y1homing                         <= joint.1.homing => lut5.0.in-1
 net y2homing                         <= joint.2.homing => lut5.0.in-2
-net ohmic-enable                                       => lut5.0.in-3
+# disable limits during any probing (ohmic or z-offset operations)
+net ohmic-enable                     => probe-active.in0
+net plasmac:z-offset-enable          => probe-active.in1
+net any-probe-active probe-active.out => lut5.0.in-3
 # home switch is just the output of the debounced input
 net all-limit-home                   =>  joint.0.home-sw-in
 net all-limit-home                   =>  joint.1.home-sw-in
 net all-limit-home                   =>  joint.2.home-sw-in
 net all-limit-home                   =>  plasmac.float-switch
-# limit switches are the output of the lut5, i.e. only on if nothing  
+# limit switches are the output of the lut5, i.e. only on if nothing
 net all-limit                        =>  joint.0.neg-lim-sw-in
 net all-limit                        =>  joint.1.neg-lim-sw-in
 net all-limit                        =>  joint.2.neg-lim-sw-in
+net all-limit                        =>  joint.3.neg-lim-sw-in
 
 
 
@@ -352,5 +360,7 @@ net joint-3-pos-fb => pid.z.feedback
 # PID Output
 net joint.3.output <= pid.z.output
 net joint.3.output => hm2_[MESA](BOARD).0.stepgen.00.velocity-cmd
+
+net plasmac:axis-z-position joint.3.pos-fb => plasmac.axis-z-position
 
 

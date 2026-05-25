@@ -213,6 +213,17 @@ sudo lsusb                     # Look for "Silicon Labs" manufacturer
 
 ## Critical Configuration Notes
 
+### QtPlasmaC Parameters (qtplasmac-metric.prefs)
+
+**IMPORTANT: Never edit qtplasmac-metric.prefs directly while LinuxCNC is running.** QtPlasmaC overwrites it with in-memory values on exit. Always change plasma parameters via the **Parameters tab in the GUI**, then click **SAVE**.
+
+**Feed Rate parameters (all in mm/min, NOT mm/s):**
+- **Setup Feed Rate** — controls Z speed for ALL setup moves: moving to probe height, raising to pierce height, etc. If probe test feels slow, this is usually why. Was found set to 100 mm/min (way too slow). Reasonable value: 1000–3000 mm/min.
+- **Probe Feed Rate** — controls Z speed only during the actual downward probe to find material. Reasonable value: 500–1500 mm/min depending on float switch travel.
+- Float Switch Travel = 4.38mm (measured). At 1500 mm/min (25 mm/s), overrun = 0.5 × (25²/750) = 0.42mm — well within travel.
+
+**INI velocity parameters are in mm/s; QtPlasmaC plasma parameters are in mm/min.**
+
 ### THCAD Parameters
 
 IMPORTANT: If using QtPlasmaC, offset/scale parameters are set in the GUI Parameters screen. The values in HAL files are ignored. Always enable "ohmic probe enable" in GUI if using ohmic sensing.

@@ -1,0 +1,2 @@
+* `glxgears`
+* `latency-test`

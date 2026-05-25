@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/sbin/ethtool -C enp0s31f6 rx-usecs 0

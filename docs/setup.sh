@@ -19,11 +19,13 @@ mkdir ~/linuxcnc/nc_files
 sudo cp setup/99-usb.rules /etc/udev/rules.d/99-usb.rules
 sudo udevadm control --reload-rules
 
+# Mesa config tool
 echo 'deb [arch=amd64] https://gnipsel.com/mesact/apt-repo stable main' | sudo tee /etc/apt/sources.list.d/mesact.list
 sudo curl --silent --show-error https://gnipsel.com/mesact/apt-repo/pgp-key.public -o /etc/apt/trusted.gpg.d/mesact.ascsudo curl --silent --show-error https://gnipsel.com/mesact/apt-repo/pgp-key.public -o /etc/apt/trusted.gpg.d/mesact.asc
 sudo apt update
 sudo apt install mesact ethtool
 
+# Github
 (type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
 	&& sudo mkdir -p -m 755 /etc/apt/keyrings \
 	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
@@ -33,6 +35,7 @@ sudo apt install mesact ethtool
 	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
 	&& sudo apt update \
 	&& sudo apt install gh -y
+	&& gh auth login
 
 
 # https://wiki.debian.org/Wine#Installation_on_Debian_Jessie_and_newer
@@ -48,4 +51,13 @@ sudo apt install \
 
 # This is an intel network, disable IRQ coalescing - edit this file to reflect the correct NIC	  
 # after, running sudo ethtool -c enp0s31f6 | grep rx-usecs -> should show `rx-usecs:0`
+sudo ethtool -c enp0s31f6 | grep rx-usecs &&
 sudo cp setup/disable-coalescing  /etc/network/if-up.d/disable-coalescing
+
+# Claude code
+curl -fsSL https://claude.ai/install.sh | bash
+
+# Dropbox
+sudo apt install python3-gpg -y &&
+wget -O /tmp/dropbox.deb "https://linux.dropbox.com/packages/debian/dropbox_2026.05.06_amd64.deb" &&
+sudo dpkg -i /tmp/dropbox.deb ; sudo apt-get install -f -y

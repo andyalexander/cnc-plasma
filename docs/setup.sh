@@ -5,12 +5,12 @@ sudo apt-get install net-tools git
 #sudo rm /etc/{initramfs/post-update.d/,kernel/{postinst.d/,postrm.d/}}z50-raspi-firmware
 #sudo apt purge raspi-firmware
 
-#cd ~
-#mkdir linuxcnc
-#cd linuxcnc
-#mkdir configs
-#cd configs
-#git clone https://github.com/andyalexander/cnc-plasma.git
+cd ~
+mkdir linuxcnc
+cd linuxcnc
+mkdir configs
+cd configs
+git clone https://github.com/andyalexander/cnc-plasma.git
 
 #cd cnc-plasma
 

@@ -1,6 +1,6 @@
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install net-tools git
+sudo apt-get install net-tools git arping
 
 #sudo rm /etc/{initramfs/post-update.d/,kernel/{postinst.d/,postrm.d/}}z50-raspi-firmware
 #sudo apt purge raspi-firmware
@@ -71,3 +71,9 @@ sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microso
   https://packages.microsoft.com/repos/code stable main" \
   > /etc/apt/sources.list.d/vscode.list' &&
 sudo apt update && sudo apt install code -y
+
+# Networking
+# If there are problems run: `sudo arping -I enp0s31f6 10.10.10.10` to do a L2 check
+# Disable firewall rules
+sudo iptables -I INPUT -i enp0s31f6 -j ACCEPT &&
+sudo iptables -I OUTPUT -o enp0s31f6 -j ACCEPT

@@ -55,7 +55,9 @@ sudo ethtool -c enp0s31f6 | grep rx-usecs &&
 sudo cp setup/disable-coalescing  /etc/network/if-up.d/disable-coalescing
 
 # Claude code
-curl -fsSL https://claude.ai/install.sh | bash
+curl -fsSL https://claude.ai/install.sh | bash &&
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+
 
 # Dropbox
 sudo apt install python3-gpg -y &&

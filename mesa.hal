@@ -4,11 +4,12 @@ addf plasmac                  	servo-thread
 
 
 # ---INPUT DEBOUNCE---
-loadrt dbounce names=db_breakaway,db_float,db_ohmic,db_arc-ok
+loadrt dbounce names=db_breakaway,db_float,db_ohmic,db_arc-ok,db_y2lim
 addf db_float    				servo-thread
 addf db_ohmic     				servo-thread
 addf db_breakaway 				servo-thread
 addf db_arc-ok    				servo-thread
+addf db_y2lim     				servo-thread
 
 # ---PROBE ACTIVE LOGIC---
 # Disable limits during ohmic probing or Z-offset operations
@@ -20,6 +21,7 @@ addf probe-active 				servo-thread
 # for the float and ohmic inputs each increment in delay is
 # is a 0.001mm (0.00004") increase in any probed height result
 setp db_float.delay     0
+setp db_y2lim.delay     0
 setp db_ohmic.delay     5
 setp db_breakaway.delay 5
 setp db_arc-ok.delay    5
@@ -124,13 +126,22 @@ net any-probe-active probe-active.out => lut5.0.in-3
 # home switch is just the output of the debounced input
 net all-limit-home                   =>  joint.0.home-sw-in
 net all-limit-home                   =>  joint.1.home-sw-in
-net all-limit-home                   =>  joint.2.home-sw-in
 net all-limit-home                   =>  plasmac.float-switch
 # limit switches are the output of the lut5, i.e. only on if nothing
 net all-limit                        =>  joint.0.neg-lim-sw-in
 net all-limit                        =>  joint.1.neg-lim-sw-in
-net all-limit                        =>  joint.2.neg-lim-sw-in
 net all-limit                        =>  joint.3.neg-lim-sw-in
+
+# ---Y2 LIMIT SWITCH (joint.2 / second Y motor - anti-racking)---
+# Dedicated switch: HOME_IS_SHARED=1 in the ini handles limit suppression
+# during homing, so no lut5 is needed here. Each Y joint latches on its
+# own switch during simultaneous homing (HOME_SEQUENCE=-1), squaring the
+# gantry on every home cycle.
+net y2-limit-raw                     <= hm2_[MESA](BOARD).0.inmux.00.input-21-not
+net y2-limit-raw                     => db_y2lim.in
+net y2-limit-home                    <= db_y2lim.out
+net y2-limit-home                    =>  joint.2.home-sw-in
+net y2-limit-home                    =>  joint.2.neg-lim-sw-in
 
 
 

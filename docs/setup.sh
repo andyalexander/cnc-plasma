@@ -74,6 +74,14 @@ sudo apt update && sudo apt install code -y
 
 # Networking
 # If there are problems run: `sudo arping -I enp0s31f6 10.10.10.10` to do a L2 check
+#Make the config non-managed
+sudo bash -c 'cat > /etc/NetworkManager/conf.d/mesa.conf << EOF
+[keyfile]
+unmanaged-devices=interface-name:enp0s31f6
+EOF' &&
+sudo systemctl restart NetworkManager &&
+nmcli dev status
+
 # Disable firewall rules
 sudo iptables -I INPUT -i enp0s31f6 -j ACCEPT &&
 sudo iptables -I OUTPUT -o enp0s31f6 -j ACCEPT

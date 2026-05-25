@@ -85,3 +85,7 @@ nmcli dev status
 # Disable firewall rules
 sudo iptables -I INPUT -i enp0s31f6 -j ACCEPT &&
 sudo iptables -I OUTPUT -o enp0s31f6 -j ACCEPT
+
+# Disable suspend (second command re-enables)
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+#sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target

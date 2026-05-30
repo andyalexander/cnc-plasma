@@ -80,7 +80,8 @@ sudo bash -c 'cat > /etc/NetworkManager/conf.d/mesa.conf << EOF
 unmanaged-devices=interface-name:enp0s31f6
 EOF' &&
 sudo systemctl restart NetworkManager &&
-nmcli dev status
+nmcli dev status &&
+sudo arping -I enp0s31f6 10.10.10.10
 
 # Disable firewall rules
 sudo iptables -I INPUT -i enp0s31f6 -j ACCEPT &&

@@ -3,7 +3,7 @@ Mode = 0
 Estop type = 2
 Autorepeat all = False
 Flash error = False
-Use keyboard shortcuts = True
+Use keyboard shortcuts = False
 Use soft keyboard = False
 Show materials = True
 Run from line = True
@@ -87,19 +87,19 @@ Preview = #000000
 THC enable = False
 Corner lock enable = False
 Void lock enable = False
-Use auto volts = False
+Use auto volts = True
 Ohmic probe enable = True
 THC auto = True
 
 [STATISTICS]
-Cut time = 0.0
+Cut time = 13.69
 Paused time = 5.72
-Probe time = 1.53
-Program run time = 38.25
-Torch on time = 9.0
-Rapid time = 3.45
-Cut length = 0.0
-Pierce count = 3
+Probe time = 8.03
+Program run time = 74.38
+Torch on time = 29.45
+Rapid time = 7.61
+Cut length = 924.48
+Pierce count = 9
 
 [PLASMA_PARAMETERS]
 Setup Feed Rate = 500.0

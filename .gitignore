@@ -2,6 +2,7 @@
 lazygit
 machine_log*
 *.bak
+*.backup
 metric_position.txt
 autosave.*
 halshow.*
@@ -10,3 +11,4 @@ metric_parameters.txt
 *.swp
 machine_log_*.txt
 update_log.txt
+__pycache__/
